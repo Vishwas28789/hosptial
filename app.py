@@ -19,21 +19,35 @@ logging.basicConfig(level=logging.INFO)
 app.logger.setLevel(logging.INFO)
 
 # ─── MongoDB Connection ────────────────────────────────────────────────────────
-MONGO_URI = os.environ.get('MONGO_URI', 'mongomock')
-if MONGO_URI == 'mongomock':
+MONGO_URI = os.environ.get('MONGO_URI', '').strip()
+is_mock = False
+
+def init_mock_db():
     import mongomock
-    client = mongomock.MongoClient()
-    db = client['hospital']
-    # Mongomock wipes data when the process restarts, so we load the mock data on boot
+    mock_client = mongomock.MongoClient()
+    mock_db = mock_client['hospital']
     import threading
     def seed_mock():
         from setup_demo_data import setup_demo
         setup_demo()
-    # Run slightly later to ensure app is fully initialized
     threading.Timer(1.0, seed_mock).start()
+    return mock_client, mock_db
+
+if not MONGO_URI or MONGO_URI == 'mongomock':
+    app.logger.info("No MONGO_URI found or set to mongomock. Starting in Mock/In-Memory Mode.")
+    client, db = init_mock_db()
+    is_mock = True
 else:
-    client = pymongo.MongoClient(MONGO_URI)
-    db = client.get_database() if hasattr(client, 'get_database') and client.get_database().name else client['hospital']
+    try:
+        app.logger.info("Attempting to connect to MongoDB...")
+        client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
+        client.server_info() # Trigger connection test
+        db = client.get_database() if hasattr(client, 'get_database') and client.get_database().name else client['hospital']
+        app.logger.info("Successfully connected to MongoDB.")
+    except Exception as e:
+        app.logger.error(f"MongoDB connection failed: {e}. Automatically falling back to Mock/In-Memory Mode.")
+        client, db = init_mock_db()
+        is_mock = True
 
 # Collections
 users_col        = db['users']
@@ -45,9 +59,14 @@ appointments_col = db['appointments']
 treatments_col   = db['treatments']
 
 # ─── Indexes ──────────────────────────────────────────────────────────────────
-users_col.create_index('username', unique=True)
-departments_col.create_index('name', unique=True)
-appointments_col.create_index([('doctor_id', 1), ('date', 1), ('time', 1)])
+if not is_mock:
+    try:
+        users_col.create_index('username', unique=True)
+        departments_col.create_index('name', unique=True)
+        appointments_col.create_index([('doctor_id', 1), ('date', 1), ('time', 1)])
+        app.logger.info("MongoDB indexes created successfully.")
+    except Exception as e:
+        app.logger.warning(f"Could not create indexes: {e}")
 
 # ─── Helper Utilities ─────────────────────────────────────────────────────────
 
