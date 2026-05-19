@@ -19,9 +19,21 @@ logging.basicConfig(level=logging.INFO)
 app.logger.setLevel(logging.INFO)
 
 # ─── MongoDB Connection ────────────────────────────────────────────────────────
-MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/hospital')
-client = pymongo.MongoClient(MONGO_URI)
-db = client.get_database()
+MONGO_URI = os.environ.get('MONGO_URI', 'mongomock')
+if MONGO_URI == 'mongomock':
+    import mongomock
+    client = mongomock.MongoClient()
+    db = client['hospital']
+    # Mongomock wipes data when the process restarts, so we load the mock data on boot
+    import threading
+    def seed_mock():
+        from setup_demo_data import setup_demo
+        setup_demo()
+    # Run slightly later to ensure app is fully initialized
+    threading.Timer(1.0, seed_mock).start()
+else:
+    client = pymongo.MongoClient(MONGO_URI)
+    db = client.get_database() if hasattr(client, 'get_database') and client.get_database().name else client['hospital']
 
 # Collections
 users_col        = db['users']

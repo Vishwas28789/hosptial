@@ -1,33 +1,59 @@
 {% extends "base.html" %}
 {% block title %}Login - Hospital Management System{% endblock %}
-{% block og_title %}Login to Hospital Management System{% endblock %}
-{% block og_description %}Secure login to the Hospital Management System. Access your dashboard as Admin, Doctor, or Patient. Built by Adinath Jagtap.{% endblock %}
-{% block twitter_title %}Login to Hospital Management System{% endblock %}
-{% block twitter_description %}Secure login to manage appointments and healthcare operations.{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">🔐 Login</h4>
-            </div>
-            <div class="card-body">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
-                <hr>
-                <div class="text-center">
-                    <p class="mb-0">Don't have an account? <a href="{{ url_for('register') }}">Register as Patient</a></p>
+<div class="login-split">
+    <!-- Left Side: Login Form -->
+    <div class="login-left">
+        <div class="login-card">
+            <h2 class="mb-2" style="font-size: 2.2rem;">Welcome back</h2>
+            <p class="text-muted mb-4">Enter your credentials to access your dashboard.</p>
+            
+            <form method="POST">
+                <div class="mb-4">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required autofocus>
                 </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 1.1rem;">Sign In</button>
+            </form>
+            
+            <div class="mt-4 text-center">
+                <p class="mb-0 text-muted">Don't have an account? <a href="{{ url_for('register') }}" class="text-primary fw-bold">Register as Patient</a></p>
             </div>
+
+            <!-- Demo Login Helpers -->
+            <hr class="my-4">
+            <p class="text-muted text-center mb-3" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Quick Login (Demo)</p>
+            <div class="demo-credentials">
+                <div class="demo-btn" onclick="fillDemo('admin', 'admin123')">🧑‍💼 Admin</div>
+                <div class="demo-btn" onclick="fillDemo('doctor_demo', 'doctor123')">👨‍⚕️ Doctor</div>
+                <div class="demo-btn" onclick="fillDemo('patient_demo', 'patient123')">🩺 Patient</div>
+            </div>
+            <script>
+                function fillDemo(username, password) {
+                    document.getElementById('username').value = username;
+                    document.getElementById('password').value = password;
+                }
+            </script>
+        </div>
+    </div>
+
+    <!-- Right Side: Decorative -->
+    <div class="login-right">
+        <!-- Floating shapes for visual interest -->
+        <div class="login-shape" style="width: 300px; height: 300px; top: -50px; left: -50px;"></div>
+        <div class="login-shape" style="width: 200px; height: 200px; bottom: 100px; right: -50px; animation-delay: -5s;"></div>
+        <div class="login-shape" style="width: 150px; height: 150px; top: 40%; left: 60%; animation-delay: -2s;"></div>
+        
+        <div style="position: relative; z-index: 10; padding: 0 40px;">
+            <h1 style="font-size: 3.5rem; color: white; margin-bottom: 20px;">HealthCare<br>Reimagined.</h1>
+            <p style="font-size: 1.2rem; color: rgba(255,255,255,0.8); max-width: 400px;">
+                Experience the future of medical management with our premium, intuitive, and secure platform designed for modern hospitals.
+            </p>
         </div>
     </div>
 </div>
